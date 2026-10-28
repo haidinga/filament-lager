@@ -1,0 +1,1447 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#2c2620">
+<title>Filament-Lager · Bergliacht</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Lager">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/icons/favicon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="assets/icons/icon-192.png">
+<style>
+/* ==========================================================
+   Tokens (aus dem Bergliacht-Webshop übernommen)
+========================================================== */
+
+@font-face { font-family: "Satoshi"; src: url("assets/fonts/Satoshi-Regular.woff") format("woff"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "Satoshi"; src: url("assets/fonts/Satoshi-Medium.woff") format("woff"); font-weight: 500 600; font-display: swap; }
+@font-face { font-family: "Satoshi"; src: url("assets/fonts/Satoshi-Bold.woff") format("woff"); font-weight: 700; font-display: swap; }
+
+:root {
+    --color-primary: #6A4B3B;
+    --color-primary-light: #856555;
+    --color-primary-dark: #563B2F;
+    --color-accent: #5C7257;
+    --color-background: #F5F1EA;
+    --color-surface: #E8E1D7;
+    --color-surface-secondary: #EEE8DF;
+    --color-surface-tertiary: #DDD5CA;
+    --color-text-primary: #3B342D;
+    --color-text-secondary: #6E655C;
+    --color-text-muted: #8A8076;
+    --color-text-inverse: #F5F1EA;
+    --color-border: #C9BFB2;
+    --color-border-strong: #AFA397;
+    --color-warning: #C39232;
+    --color-danger: #B64D4D;
+    --color-info: #50739A;
+
+    --radius-xs: .25rem; --radius-sm: .5rem; --radius-md: .75rem; --radius-lg: 1rem; --radius-xl: 1.5rem; --radius-full: 9999px;
+
+    --shadow-xs: 0 1px 2px rgba(59, 52, 45, .04);
+    --shadow-sm: 0 2px 6px rgba(59, 52, 45, .06);
+    --shadow-md: 0 8px 20px rgba(59, 52, 45, .08);
+    --shadow-lg: 0 16px 40px rgba(59, 52, 45, .10);
+    --shadow-xl: 0 24px 60px rgba(59, 52, 45, .14);
+
+    --space-1: .25rem; --space-2: .5rem; --space-3: .75rem; --space-4: 1rem; --space-5: 1.25rem; --space-6: 1.5rem;
+    --space-8: 2rem; --space-10: 2.5rem; --space-12: 3rem; --space-16: 4rem; --space-20: 5rem; --space-24: 6rem;
+
+    --transition-fast: .15s ease; --transition-base: .25s ease; --transition-slow: .4s ease;
+
+    --font-family-base: "Satoshi", system-ui, sans-serif;
+    --font-size-xs: .75rem; --font-size-sm: .875rem; --font-size-base: 1rem; --font-size-md: 1.125rem;
+    --font-size-lg: 1.25rem; --font-size-xl: 1.5rem; --font-size-2xl: 2rem; --font-size-3xl: 2.5rem; --font-size-4xl: 3rem; --font-size-5xl: 4rem;
+
+    --container: 1280px;
+
+    /* Füllstand (Gesundheitsleiste) */
+    --hp-70: #6E8F5E;
+    --hp-50: #B9A23A;
+    --hp-30: #C9803A;
+    --hp-10: #B64D4D;
+
+    /* Regal */
+    --roll: 6.25rem;
+    --board: 1.8rem;
+    --row: calc(var(--roll) + var(--board) + 1.25rem);
+    --cell: calc(var(--roll) + .5rem);
+}
+
+/* ==========================================================
+   Base
+========================================================== */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+    font-family: var(--font-family-base);
+    font-size: var(--font-size-base);
+    line-height: 1.6;
+    color: var(--color-text-primary);
+    background: var(--color-background);
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; background: none; border: 0; }
+a { color: inherit; }
+svg.icon { width: 1.25rem; height: 1.25rem; flex: none; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+::selection { background: var(--color-primary); color: var(--color-text-inverse); }
+:focus-visible { outline: 2px solid var(--color-primary); outline-offset: 3px; border-radius: var(--radius-xs); }
+
+.container { width: 100%; max-width: var(--container); margin: 0 auto; padding: 0 var(--space-8); }
+.label { font-size: var(--font-size-xs); font-weight: 500; letter-spacing: .14em; text-transform: uppercase; }
+[hidden] { display: none !important; }
+
+.btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+    height: 2.75rem; padding: 0 var(--space-5);
+    border-radius: var(--radius-sm);
+    font-size: var(--font-size-sm); font-weight: 500; letter-spacing: .12em; text-transform: uppercase;
+    white-space: nowrap; text-decoration: none;
+    transition: background var(--transition-base), transform var(--transition-fast), box-shadow var(--transition-base), border-color var(--transition-base);
+}
+.btn:active { transform: translateY(1px); }
+.btn--dark { background: var(--color-primary); color: var(--color-text-inverse); }
+.btn--dark:hover { background: var(--color-primary-dark); box-shadow: var(--shadow-md); }
+.btn--line { border: 1px solid var(--color-border); color: var(--color-text-primary); }
+.btn--line:hover { border-color: var(--color-border-strong); background: var(--color-surface-secondary); }
+.btn svg { width: 1.1rem; height: 1.1rem; }
+.icon-btn {
+    display: inline-grid; place-items: center;
+    width: 2.5rem; height: 2.5rem; border-radius: var(--radius-full);
+    transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+/* ==========================================================
+   Header
+========================================================== */
+
+.hero {
+    position: relative;
+    color: var(--color-text-inverse);
+    background:
+        linear-gradient(90deg, rgba(28, 23, 19, .72) 0%, rgba(28, 23, 19, .42) 50%, rgba(28, 23, 19, .15) 85%),
+        linear-gradient(0deg, rgba(28, 23, 19, .35), rgba(0, 0, 0, 0) 55%),
+        url("assets/images/hero-mobil.jpg") center 40% / cover no-repeat,
+        #2c2620;
+    padding-bottom: calc(var(--space-16) + 2rem);
+    padding-top: env(safe-area-inset-top);
+}
+.hero__bar { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; height: 5.5rem; }
+.hero__domain { font-size: var(--font-size-sm); opacity: .85; display: flex; align-items: center; gap: var(--space-2); }
+.sync { display: inline-flex; align-items: center; gap: var(--space-2); cursor: default; }
+.sync__dot { width: .5rem; height: .5rem; border-radius: 50%; background: #9fb894; box-shadow: 0 0 0 3px rgba(159, 184, 148, .25); transition: background var(--transition-base), box-shadow var(--transition-base); }
+.sync.is-saving .sync__dot { background: #e2c27a; box-shadow: 0 0 0 3px rgba(226, 194, 122, .25); animation: blink 1s ease-in-out infinite; }
+.sync.is-offline .sync__dot { background: #b9aea2; box-shadow: 0 0 0 3px rgba(185, 174, 162, .25); }
+.sync.is-error .sync__dot { background: #e09a9a; box-shadow: 0 0 0 3px rgba(224, 154, 154, .3); }
+.sync.is-offline, .sync.is-error { cursor: pointer; }
+.hero__actions { justify-self: end; display: flex; gap: var(--space-1); }
+.hero__actions .icon-btn:hover { background: rgba(245, 241, 234, .14); }
+.logo { width: 3rem; height: 3rem; background: var(--color-text-inverse); -webkit-mask: url("assets/images/logo.svg") center / contain no-repeat; mask: url("assets/images/logo.svg") center / contain no-repeat; }
+
+.hero__content { display: flex; align-items: flex-end; justify-content: space-between; gap: var(--space-8); flex-wrap: wrap; padding-top: var(--space-8); }
+.hero__label { opacity: .9; margin-bottom: var(--space-4); }
+.hero__title { font-size: clamp(2.5rem, 6vw, 4rem); font-weight: 400; line-height: 1.02; letter-spacing: -.035em; }
+.hero__stats { display: flex; flex-wrap: wrap; gap: var(--space-10); }
+.stat__value { font-size: var(--font-size-2xl); line-height: 1; letter-spacing: -.02em; white-space: nowrap; }
+.stat__label { margin-top: var(--space-2); opacity: .75; }
+
+/* ==========================================================
+   Regal
+========================================================== */
+
+.shelf {
+    position: relative; z-index: 5;
+    margin-top: calc(-1 * var(--space-16));
+    padding: var(--space-6) var(--space-6) var(--space-4);
+    background: var(--color-background);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
+}
+.toolbar { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; margin-bottom: var(--space-5); padding: 0 var(--space-2); }
+.filters { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.filter {
+    display: inline-flex; align-items: center; gap: var(--space-2);
+    height: 2.25rem; padding: 0 var(--space-4);
+    border-radius: var(--radius-full);
+    border: 1px solid var(--color-border);
+    font-size: var(--font-size-sm); color: var(--color-text-secondary);
+    transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+.filter:hover { border-color: var(--color-border-strong); color: var(--color-text-primary); }
+.filter.is-active { background: var(--color-text-primary); border-color: var(--color-text-primary); color: var(--color-text-inverse); }
+.filter small { font-size: var(--font-size-xs); opacity: .6; }
+.filter__sep { width: 1px; height: 1.5rem; background: var(--color-border); align-self: center; margin: 0 var(--space-1); }
+
+/* Rückwand mit Brettern: jede Rasterzeile endet auf einem Brett */
+.cabinet {
+    position: relative;
+    padding: var(--space-5) var(--space-4) 0;
+    border-radius: var(--radius-lg);
+    background:
+        linear-gradient(90deg, rgba(59, 52, 45, .10), rgba(59, 52, 45, 0) 6%, rgba(59, 52, 45, 0) 94%, rgba(59, 52, 45, .10)),
+        linear-gradient(180deg, #DED6CA, #E9E2D8);
+    box-shadow: inset 0 2px 10px rgba(59, 52, 45, .12);
+    overflow: hidden;
+}
+.rows {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, var(--cell));
+    grid-auto-rows: var(--row);
+    justify-content: center;
+    background: repeating-linear-gradient(180deg,
+        transparent 0, transparent calc(var(--row) - var(--board) - 6px),
+        rgba(59, 52, 45, .10) calc(var(--row) - var(--board) - 6px), rgba(59, 52, 45, 0) calc(var(--row) - var(--board)),
+        #A38672 calc(var(--row) - var(--board)), #A38672 calc(var(--row) - var(--board) + 2px),
+        #7C5A48 calc(var(--row) - var(--board) + 2px), #6A4B3B calc(var(--row) - 3px),
+        #4E362B calc(var(--row) - 3px), #4E362B var(--row));
+    margin: 0 calc(-1 * var(--space-4));
+    padding: 0 var(--space-4);
+}
+
+.cell {
+    position: relative;
+    display: flex; flex-direction: column; align-items: center; justify-content: flex-end;
+    padding-bottom: var(--board);
+    animation: rise .45s cubic-bezier(.2, .9, .25, 1) backwards;
+}
+.cell__btn { display: block; border-radius: 50%; transition: transform var(--transition-base); }
+.cell__btn:hover { transform: translateY(-4px); }
+.cell__btn:hover .spool { box-shadow: 0 14px 18px -10px rgba(28, 23, 19, .55), inset 0 0 0 2px rgba(255, 255, 255, .06); }
+.cell__btn:focus-visible { outline-offset: 4px; }
+
+/* Leiste vorne auf dem Brett */
+.hp {
+    position: absolute; left: 50%; bottom: calc((var(--board) - .7rem) / 2 - 1px); translate: -50% 0;
+    width: calc(var(--roll) * .86); height: .7rem;
+    display: grid; grid-template-columns: repeat(10, 1fr); gap: 2px;
+    padding: 2px;
+    border-radius: 3px;
+    background: rgba(28, 23, 19, .55);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, .4), 0 1px 0 rgba(255, 255, 255, .12);
+}
+.hp i { border-radius: 1px; background: rgba(255, 255, 255, .08); }
+.hp i.on { background: var(--hp); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .35); }
+.hp--70 { --hp: var(--hp-70); }
+.hp--50 { --hp: var(--hp-50); }
+.hp--30 { --hp: var(--hp-30); }
+.hp--10 { --hp: var(--hp-10); }
+.hp--10 i.on { animation: blink 1.6s ease-in-out infinite; }
+.hp-text { font-size: var(--font-size-xs); font-weight: 500; color: var(--color-text-secondary); white-space: nowrap; }
+
+/* Eine Rolle von vorne: Spulenrand, Filament (schrumpft mit dem Füllstand), Nabe */
+.spool {
+    --s: var(--roll);
+    position: relative;
+    width: var(--s); height: var(--s);
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 50% 50%, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, .35) 71%),
+        radial-gradient(circle at 35% 30%, #4a423b, #2b2520 70%);
+    box-shadow: 0 10px 14px -10px rgba(28, 23, 19, .6), inset 0 0 0 2px rgba(255, 255, 255, .06);
+    transition: box-shadow var(--transition-base);
+}
+.spool::after { /* Rand-Glanz */
+    content: ""; position: absolute; inset: 3%; border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, .08);
+    pointer-events: none;
+}
+.spool__fil {
+    position: absolute; inset: var(--inset, 6%);
+    border-radius: 50%;
+    background:
+        radial-gradient(circle at 32% 28%, rgba(255, 255, 255, .38), rgba(255, 255, 255, 0) 45%),
+        repeating-radial-gradient(circle at 50% 50%, rgba(0, 0, 0, .07) 0 1px, rgba(0, 0, 0, 0) 1px 3px),
+        radial-gradient(circle at 50% 50%, rgba(0, 0, 0, .25) 30%, rgba(0, 0, 0, 0) 55%),
+        var(--c);
+    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .18), 0 0 0 1px rgba(255, 255, 255, .05);
+    transition: inset var(--transition-slow);
+}
+.spool__hub {
+    position: absolute; inset: 33%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 35%, #574d44, #2f2823 75%);
+    box-shadow: 0 0 0 2px rgba(0, 0, 0, .25), inset 0 1px 0 rgba(255, 255, 255, .1);
+}
+.spool__hub::after { /* Loch */
+    content: ""; position: absolute; inset: 30%; border-radius: 50%;
+    background: radial-gradient(circle at 50% 60%, #CFC6B9, #B3A898);
+    box-shadow: inset 0 2px 3px rgba(0, 0, 0, .45);
+}
+.spool__holes { position: absolute; inset: 0; border-radius: 50%; pointer-events: none; }
+.spool__holes i {
+    position: absolute; left: 50%; top: 50%; width: 9%; height: 9%;
+    border-radius: 50%; background: rgba(0, 0, 0, .35);
+    transform: rotate(var(--a)) translate(0, -205%) ;
+    translate: -50% -50%;
+}
+.badge {
+    position: absolute; top: -.2rem; right: -.2rem;
+    min-width: 1.35rem; height: 1.35rem; padding: 0 .3rem;
+    display: grid; place-items: center;
+    border-radius: var(--radius-full);
+    background: var(--color-warning); color: #fff;
+    font-size: .7rem; font-weight: 700;
+    box-shadow: 0 0 0 2px var(--color-background);
+}
+
+/* Leerer Platz: Farbe ohne Rolle */
+.ghost {
+    width: var(--roll); height: var(--roll);
+    border-radius: 50%;
+    border: 2px dashed rgba(59, 52, 45, .28);
+    display: grid; place-items: center;
+    background: radial-gradient(circle, var(--c) 0 22%, rgba(0, 0, 0, 0) 23%);
+    color: var(--color-text-muted);
+    transition: border-color var(--transition-base), background var(--transition-base);
+}
+.ghost span { font-size: var(--font-size-xs); font-weight: 500; letter-spacing: .1em; text-transform: uppercase; margin-top: 62%; }
+.cell__btn:hover .ghost { border-color: var(--color-primary); }
+
+.shelf__foot { display: flex; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; padding: var(--space-4) var(--space-2) 0; font-size: var(--font-size-sm); color: var(--color-text-muted); }
+.legend { display: flex; gap: var(--space-4); flex-wrap: wrap; align-items: center; }
+.legend span { display: inline-flex; align-items: center; gap: var(--space-2); }
+.legend i { width: .9rem; height: .45rem; border-radius: 2px; background: var(--hp); }
+
+.empty { text-align: center; padding: var(--space-16) var(--space-4); color: var(--color-text-muted); }
+
+/* ==========================================================
+   Shops
+========================================================== */
+
+.main { padding: var(--space-16) 0 calc(var(--space-24) + 2rem); }
+.section__head { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--space-4); margin-bottom: var(--space-6); flex-wrap: wrap; }
+.section__label { color: var(--color-text-muted); margin-bottom: var(--space-2); }
+.section__title { font-size: var(--font-size-3xl); font-weight: 400; letter-spacing: -.03em; line-height: 1.1; }
+.shops { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-6); }
+.shop {
+    position: relative; overflow: hidden;
+    padding: var(--space-8);
+    border-radius: var(--radius-xl);
+    background: radial-gradient(ellipse 30rem 20rem at 100% 0%, rgba(245, 241, 234, .08), rgba(245, 241, 234, 0) 70%), #2f2823;
+    color: var(--color-text-inverse);
+}
+.shop__label { opacity: .7; margin-bottom: var(--space-3); }
+.shop__name { font-size: var(--font-size-2xl); font-weight: 400; letter-spacing: -.02em; line-height: 1.1; }
+.shop__text { opacity: .75; margin-top: var(--space-2); font-size: var(--font-size-sm); max-width: 26rem; }
+.shop__actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-6); }
+.btn--light { background: var(--color-background); color: var(--color-text-primary); }
+.btn--light:hover { background: #fff; box-shadow: var(--shadow-md); }
+.btn--ghost { border: 1px solid rgba(245, 241, 234, .3); color: var(--color-text-inverse); }
+.btn--ghost:hover { background: rgba(245, 241, 234, .1); border-color: rgba(245, 241, 234, .55); }
+.shop__dots { position: absolute; right: -1.5rem; top: -1.5rem; display: flex; gap: .4rem; opacity: .9; }
+.shop__dots i { width: 2.6rem; height: 2.6rem; border-radius: 50%; background: var(--c); box-shadow: inset 0 0 0 .45rem rgba(0, 0, 0, .35), inset 0 0 0 .8rem rgba(255, 255, 255, .06); }
+.shop__edit { position: absolute; right: var(--space-4); bottom: var(--space-4); color: rgba(245, 241, 234, .55); }
+.shop__edit:hover { background: rgba(245, 241, 234, .1); color: var(--color-text-inverse); }
+
+/* ==========================================================
+   Plus-Knopf
+========================================================== */
+
+.fab {
+    position: fixed; z-index: 30;
+    right: max(var(--space-8), env(safe-area-inset-right));
+    bottom: max(var(--space-8), env(safe-area-inset-bottom));
+    display: inline-flex; align-items: center; gap: var(--space-3);
+    height: 3.75rem; padding: 0 var(--space-6) 0 var(--space-4);
+    border-radius: var(--radius-full);
+    background: var(--color-primary); color: var(--color-text-inverse);
+    box-shadow: 0 10px 30px rgba(86, 59, 47, .35);
+    font-size: var(--font-size-sm); font-weight: 500; letter-spacing: .12em; text-transform: uppercase;
+    transition: background var(--transition-base), transform var(--transition-base), box-shadow var(--transition-base);
+}
+.fab:hover { background: var(--color-primary-dark); transform: translateY(-2px); box-shadow: 0 14px 36px rgba(86, 59, 47, .42); }
+.fab__plus { width: 2.25rem; height: 2.25rem; border-radius: 50%; display: grid; place-items: center; background: rgba(245, 241, 234, .16); transition: transform var(--transition-base); }
+.fab:hover .fab__plus { transform: rotate(90deg); }
+.fab svg { width: 1.35rem; height: 1.35rem; stroke-width: 1.8; }
+
+/* ==========================================================
+   Popups (Post-it wie in den anderen Apps)
+========================================================== */
+
+.modal { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; padding: var(--space-6); overflow-y: auto; }
+.modal__backdrop { position: fixed; inset: 0; background: rgba(28, 23, 19, .42); backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px); opacity: 0; transition: opacity var(--transition-base); }
+.modal.is-open .modal__backdrop { opacity: 1; }
+.sheet {
+    --paper: #F7F3EC; --ink: #6E655C;
+    position: relative;
+    width: min(32rem, 100%);
+    padding: var(--space-10) var(--space-8) var(--space-6);
+    background: linear-gradient(165deg, rgba(255, 255, 255, .45), rgba(255, 255, 255, 0) 45%), var(--paper);
+    border-radius: .3rem .3rem 1.6rem .3rem;
+    box-shadow: 0 2px 3px rgba(59, 52, 45, .08), 0 40px 70px -20px rgba(28, 23, 19, .5);
+    opacity: 0;
+    transform: translateY(24px) rotate(-3deg) scale(.94);
+    transition: transform .35s cubic-bezier(.2, .9, .25, 1.1), opacity var(--transition-base);
+}
+.modal.is-open .sheet { opacity: 1; transform: rotate(-.5deg); }
+.tape {
+    position: absolute; left: 50%; top: -.75rem; translate: -50% 0; rotate: -2deg;
+    width: 6rem; height: 1.6rem;
+    background: rgba(232, 225, 215, .75);
+    box-shadow: 0 1px 2px rgba(59, 52, 45, .12);
+}
+.sheet__close { position: absolute; top: var(--space-3); right: var(--space-3); color: var(--color-text-secondary); }
+.sheet__close:hover { background: rgba(255, 255, 255, .45); color: var(--color-text-primary); }
+
+.detail__head { display: flex; align-items: center; gap: var(--space-6); }
+.detail__head .spool { --s: 7.5rem; flex: none; }
+.detail__meta { min-width: 0; }
+.detail__brand { color: var(--color-text-muted); margin-bottom: var(--space-1); }
+.detail__name { font-size: var(--font-size-2xl); font-weight: 400; letter-spacing: -.025em; line-height: 1.1; overflow-wrap: anywhere; }
+.detail__hex { display: inline-flex; align-items: center; gap: var(--space-2); margin-top: var(--space-2); padding: .15rem var(--space-2) .15rem .2rem; border-radius: var(--radius-full); background: rgba(255, 255, 255, .55); font-size: var(--font-size-sm); color: var(--color-text-secondary); font-variant-numeric: tabular-nums; }
+.detail__hex i { width: 1rem; height: 1rem; border-radius: 50%; background: var(--c); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .15); }
+.detail__count { margin-top: var(--space-2); font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+
+.note {
+    display: flex; gap: var(--space-3); align-items: flex-start;
+    margin-top: var(--space-5); padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-sm);
+    background: rgba(195, 146, 50, .14); color: #7d5d1f;
+    font-size: var(--font-size-sm);
+}
+.note svg { margin-top: .1rem; }
+
+.sheet__group { margin-top: var(--space-6); }
+.sheet__group > .label { display: block; color: var(--color-text-secondary); margin-bottom: var(--space-3); }
+.levels { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: var(--space-2); }
+.level {
+    display: flex; flex-direction: column; align-items: center; gap: .35rem;
+    padding: var(--space-3) var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(59, 52, 45, .12);
+    background: rgba(255, 255, 255, .45);
+    font-size: var(--font-size-sm); font-weight: 500;
+    transition: background var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast);
+}
+.level small { font-size: var(--font-size-xs); font-weight: 400; color: var(--color-text-muted); }
+.level:hover { background: rgba(255, 255, 255, .8); }
+.level.is-active { background: var(--color-text-primary); border-color: var(--color-text-primary); color: var(--color-text-inverse); }
+.level.is-active small { color: rgba(245, 241, 234, .7); }
+.level .hp { position: static; translate: none; width: 100%; height: .45rem; gap: 1px; padding: 1px; }
+
+.sheet__actions { display: flex; flex-wrap: wrap; gap: var(--space-3); margin-top: var(--space-6); }
+.sheet__actions .btn { flex: 1 1 auto; }
+.sheet__foot { display: flex; align-items: center; gap: var(--space-4); margin-top: var(--space-6); padding-top: var(--space-5); border-top: 1px dashed rgba(59, 52, 45, .18); flex-wrap: wrap; }
+.sheet__foot .btn:last-child { margin-left: auto; }
+.link-danger { font-size: var(--font-size-sm); color: var(--color-danger); opacity: .85; }
+.link-danger:hover { opacity: 1; text-decoration: underline; text-underline-offset: 3px; }
+.link-soft { font-size: var(--font-size-sm); color: var(--color-text-secondary); }
+.link-soft:hover { color: var(--color-text-primary); text-decoration: underline; text-underline-offset: 3px; }
+.btn--empty { border: 1px solid rgba(182, 77, 77, .35); color: var(--color-danger); }
+.btn--empty:hover { background: rgba(182, 77, 77, .08); border-color: var(--color-danger); }
+
+/* Formular */
+.sheet__title { font-size: var(--font-size-xl); font-weight: 500; letter-spacing: -.02em; }
+.form { display: grid; gap: var(--space-5); margin-top: var(--space-5); }
+.field > .label { display: block; color: var(--color-text-secondary); margin-bottom: var(--space-2); }
+.field > .label em { font-style: normal; text-transform: none; letter-spacing: 0; color: var(--color-text-muted); font-weight: 400; }
+.chips { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.chip {
+    display: inline-flex; align-items: center; gap: var(--space-2);
+    padding: .35rem var(--space-3);
+    border-radius: var(--radius-full);
+    background: rgba(255, 255, 255, .45);
+    border: 1px solid rgba(59, 52, 45, .1);
+    font-size: var(--font-size-sm); color: var(--color-text-secondary);
+    transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+}
+.chip:hover { background: rgba(255, 255, 255, .75); color: var(--color-text-primary); }
+.chip.is-active { background: var(--color-text-primary); border-color: var(--color-text-primary); color: var(--color-text-inverse); }
+.soft-input {
+    width: 100%; height: 2.75rem; padding: 0 var(--space-3);
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(59, 52, 45, .14);
+    background: rgba(255, 255, 255, .5);
+    transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+.soft-input:focus { outline: none; border-color: var(--ink); background: rgba(255, 255, 255, .8); }
+.color-row { display: grid; grid-template-columns: 2.75rem minmax(0, 1fr); gap: var(--space-2); }
+.color-row input[type=color] { width: 2.75rem; height: 2.75rem; padding: 0; border: 1px solid rgba(59, 52, 45, .14); border-radius: var(--radius-sm); background: none; cursor: pointer; }
+.color-row input[type=color]::-webkit-color-swatch-wrapper { padding: 3px; }
+.color-row input[type=color]::-webkit-color-swatch { border: 0; border-radius: 5px; }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) 8rem; gap: var(--space-4); }
+.stepper { display: flex; align-items: center; height: 2.75rem; border: 1px solid rgba(59, 52, 45, .14); border-radius: var(--radius-sm); background: rgba(255, 255, 255, .5); }
+.stepper button { width: 2.5rem; height: 100%; display: grid; place-items: center; color: var(--color-text-secondary); }
+.stepper button:hover { color: var(--color-text-primary); }
+.stepper output { flex: 1; text-align: center; font-weight: 500; }
+.hint { margin-top: var(--space-2); font-size: var(--font-size-xs); color: var(--color-text-muted); }
+
+/* Hinweis unten */
+.toast {
+    position: fixed; z-index: 50; left: 50%; bottom: max(var(--space-8), env(safe-area-inset-bottom));
+    display: flex; align-items: center; gap: var(--space-5);
+    padding: var(--space-3) var(--space-3) var(--space-3) var(--space-5);
+    border-radius: var(--radius-full);
+    background: var(--color-text-primary); color: var(--color-text-inverse);
+    box-shadow: var(--shadow-xl);
+    font-size: var(--font-size-sm);
+    translate: -50% 150%; opacity: 0;
+    transition: translate .35s cubic-bezier(.2, .9, .25, 1.1), opacity var(--transition-base);
+}
+.toast.is-visible { translate: -50% 0; opacity: 1; }
+.toast button { padding: var(--space-2) var(--space-4); border-radius: var(--radius-full); background: rgba(245, 241, 234, .14); font-weight: 500; letter-spacing: .1em; text-transform: uppercase; font-size: var(--font-size-xs); }
+.toast button:hover { background: rgba(245, 241, 234, .24); }
+
+/* ==========================================================
+   Anmeldung (wie Packliste und Notizen)
+========================================================== */
+
+body.is-locked { overflow: hidden; }
+.lock {
+    position: fixed; inset: 0; z-index: 60;
+    display: grid; place-items: center;
+    padding: calc(var(--space-6) + env(safe-area-inset-top)) var(--space-6) calc(var(--space-6) + env(safe-area-inset-bottom));
+    color: var(--color-text-inverse);
+    background:
+        radial-gradient(ellipse 38rem 30rem at 50% 45%, rgba(28, 23, 19, .55), rgba(28, 23, 19, 0) 70%),
+        linear-gradient(0deg, rgba(28, 23, 19, .6), rgba(28, 23, 19, .3) 60%, rgba(28, 23, 19, .5)),
+        url("assets/images/hero-mobil.jpg") center 40% / cover no-repeat,
+        #2c2620;
+    transition: opacity var(--transition-slow), visibility var(--transition-slow);
+}
+.lock.is-leaving { opacity: 0; visibility: hidden; }
+.lock__inner { width: 100%; max-width: 26rem; text-align: center; transition: opacity var(--transition-base); }
+.lock .logo { width: 4.5rem; height: 4.5rem; margin: 0 auto var(--space-8); }
+.lock__label { opacity: .85; margin-bottom: var(--space-4); }
+.lock__title { font-size: clamp(2.5rem, 7vw, var(--font-size-5xl)); font-weight: 400; line-height: 1.05; letter-spacing: -.035em; margin-bottom: var(--space-4); }
+.lock__text { opacity: .85; margin-bottom: var(--space-10); }
+.lock__form { display: flex; flex-direction: column; gap: var(--space-3); }
+.lock__field { position: relative; }
+.lock__field svg { position: absolute; left: var(--space-4); top: 50%; translate: 0 -50%; opacity: .7; }
+.lock__input {
+    width: 100%; height: 3.25rem;
+    padding: 0 var(--space-4) 0 3rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(245, 241, 234, .35);
+    background: rgba(245, 241, 234, .12);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    color: var(--color-text-inverse);
+    transition: border-color var(--transition-base), background var(--transition-base);
+}
+.lock__input::placeholder { color: rgba(245, 241, 234, .65); }
+.lock__input:focus { outline: none; border-color: rgba(245, 241, 234, .8); background: rgba(245, 241, 234, .18); }
+.lock .btn--light { height: 3.25rem; }
+.lock__hint { margin-top: var(--space-6); font-size: var(--font-size-xs); opacity: .6; }
+.lock.is-checking .lock__inner { opacity: 0; }
+.lock__form.is-error { animation: shake .4s ease; }
+.lock__form.is-error .lock__input { border-color: #e09a9a; }
+.btn[disabled] { opacity: .7; cursor: progress; }
+.lock__remember {
+    display: flex; align-items: center; justify-content: center; gap: var(--space-2);
+    margin-top: var(--space-2);
+    font-size: var(--font-size-sm); opacity: .85; cursor: pointer; user-select: none;
+}
+.lock__remember input {
+    appearance: none; -webkit-appearance: none;
+    width: 1.1rem; height: 1.1rem; margin: 0;
+    border-radius: var(--radius-xs);
+    border: 1px solid rgba(245, 241, 234, .55);
+    background: rgba(245, 241, 234, .1);
+    display: grid; place-items: center; cursor: pointer;
+    transition: background var(--transition-fast), border-color var(--transition-fast);
+}
+.lock__remember input::after {
+    content: ""; width: .3rem; height: .55rem; margin-top: -2px;
+    border: solid var(--color-text-primary); border-width: 0 2px 2px 0;
+    transform: rotate(45deg) scale(0); transition: transform var(--transition-fast);
+}
+.lock__remember input:checked { background: var(--color-background); border-color: var(--color-background); }
+.lock__remember input:checked::after { transform: rotate(45deg) scale(1); }
+.lock__error { min-height: 1.4em; margin-top: var(--space-4); font-size: var(--font-size-sm); color: #f0b4b4; }
+@keyframes shake { 20%, 60% { transform: translateX(-6px); } 40%, 80% { transform: translateX(6px); } }
+.loading { padding: var(--space-16) 0; text-align: center; color: var(--color-text-muted); font-size: var(--font-size-sm); }
+.loading::before { content: ""; display: block; width: 1.5rem; height: 1.5rem; margin: 0 auto var(--space-4); border-radius: 50%; border: 2px solid var(--color-border); border-top-color: var(--color-primary); animation: spin .8s linear infinite; }
+@keyframes spin { to { rotate: 360deg; } }
+
+.footer { border-top: 1px solid var(--color-border); padding: var(--space-8) 0 calc(var(--space-8) + 4rem); color: var(--color-text-muted); font-size: var(--font-size-sm); }
+.footer__inner { display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); flex-wrap: wrap; }
+.footer button { color: inherit; text-decoration: underline; text-underline-offset: 3px; }
+.footer button:hover { color: var(--color-text-primary); }
+
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } }
+@keyframes blink { 50% { opacity: .45; } }
+
+/* ==========================================================
+   Responsive
+========================================================== */
+
+@media (max-width: 900px) {
+    .shops { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 640px) {
+    :root { --roll: 4rem; --board: 1.35rem; --cell: calc(var(--roll) + .4rem); }
+    .container { padding: 0 var(--space-4); }
+    .hero { padding-bottom: calc(var(--space-12) + 1.5rem); }
+    .hero__bar { height: 4.5rem; }
+    .hero__domain .sync__text { display: none; }
+    .logo { width: 2.5rem; height: 2.5rem; }
+    .hero__content { padding-top: var(--space-4); gap: var(--space-6); }
+    .hero__stats { gap: var(--space-6); width: 100%; }
+    .stat__value { font-size: var(--font-size-xl); }
+    .shelf { margin-top: calc(-1 * var(--space-10)); padding: var(--space-4) var(--space-3) var(--space-3); border-radius: var(--radius-lg); }
+    .toolbar { flex-wrap: nowrap; overflow-x: auto; margin: 0 calc(-1 * var(--space-3)) var(--space-4); padding: 0 var(--space-3); scrollbar-width: none; }
+    .toolbar::-webkit-scrollbar { display: none; }
+    .filters { flex-wrap: nowrap; }
+    .filter { white-space: nowrap; }
+    .cabinet { padding: var(--space-3) var(--space-2) 0; }
+    .rows { margin: 0 calc(-1 * var(--space-2)); padding: 0 var(--space-2); }
+    .hp { height: .55rem; bottom: calc((var(--board) - .55rem) / 2 - 1px); gap: 1px; padding: 1px; }
+    .shelf__foot { font-size: var(--font-size-xs); }
+    .main { padding-top: var(--space-12); }
+    .section__title { font-size: var(--font-size-2xl); }
+    .shop { padding: var(--space-6); }
+    .fab { right: var(--space-5); bottom: max(var(--space-5), env(safe-area-inset-bottom)); width: 4rem; height: 4rem; padding: 0; justify-content: center; }
+    .fab__label { display: none; }
+    .fab__plus { background: none; }
+    .fab svg { width: 1.6rem; height: 1.6rem; }
+    .modal { place-items: start center; padding: calc(var(--space-8) + env(safe-area-inset-top)) var(--space-3) var(--space-6); }
+    .sheet { padding: var(--space-8) var(--space-5) var(--space-5); }
+    .detail__head { gap: var(--space-4); }
+    .detail__head .spool { --s: 5.5rem; }
+    .detail__name { font-size: var(--font-size-xl); }
+    .levels { gap: var(--space-1); }
+    .two { grid-template-columns: minmax(0, 1fr); }
+    .toast { bottom: calc(max(var(--space-5), env(safe-area-inset-bottom)) + 5rem); width: max-content; max-width: calc(100% - 2rem); }
+}
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body class="is-locked">
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10" rx="2"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-ext" viewBox="0 0 24 24"><path d="M14 5h5v5M19 5l-8 8M17 14v4a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1h4"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4"/></symbol>
+    <symbol id="i-tag" viewBox="0 0 24 24"><path d="M3.5 12.5V4.5a1 1 0 0 1 1-1h8l8 8-9 9-8-8z"/><circle cx="8" cy="8" r="1.4"/></symbol>
+    <symbol id="i-warn" viewBox="0 0 24 24"><path d="M12 4l9 16H3L12 4z"/><path d="M12 10v4M12 17v.5"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12"/></symbol>
+</svg>
+
+<section class="lock is-checking" id="lock" aria-label="Anmeldung">
+    <div class="lock__inner">
+        <div class="logo" aria-label="Bergliacht"></div>
+        <p class="label lock__label">Filament-Lager</p>
+        <h1 class="lock__title">Ab ins Regal.</h1>
+        <p class="lock__text">Dein Filament-Lager ist geschützt.<br>Gib dein Passwort ein, um fortzufahren.</p>
+        <form class="lock__form" id="lockForm" autocomplete="off">
+            <div class="lock__field">
+                <svg class="icon"><use href="#i-lock"/></svg>
+                <input class="lock__input" id="lockInput" type="password" placeholder="Passwort" aria-label="Passwort" autocomplete="current-password">
+            </div>
+            <button class="btn btn--light" id="lockButton" type="submit">Entsperren</button>
+            <label class="lock__remember"><input type="checkbox" id="lockRemember" checked> Auf diesem Gerät angemeldet bleiben</label>
+        </form>
+        <p class="lock__error" id="lockError" role="alert"></p>
+        <p class="lock__hint" id="lockHint" hidden>Lokale Vorschau ohne Zugang: Jedes Passwort öffnet die Seite, gespeichert wird nur in diesem Browser.</p>
+    </div>
+</section>
+
+<header class="hero">
+    <div class="container hero__bar">
+        <div class="hero__domain">
+            <span class="sync" id="sync" role="status"><span class="sync__dot"></span><span class="sync__text" id="syncText">lager.bergliacht.at</span></span>
+        </div>
+        <a href="./" class="logo" aria-label="Filament-Lager, Startseite"></a>
+        <div class="hero__actions">
+            <button class="icon-btn" id="lockBtn" aria-label="Abmelden" title="Abmelden"><svg class="icon"><use href="#i-lock"/></svg></button>
+        </div>
+    </div>
+    <div class="container hero__content">
+        <div>
+            <p class="label hero__label">Filament-Lager</p>
+            <h1 class="hero__title">Das Regal.</h1>
+        </div>
+        <div class="hero__stats">
+            <div><div class="stat__value" id="statRollen">0</div><div class="label stat__label">Rollen</div></div>
+            <div><div class="stat__value" id="statFarben">0</div><div class="label stat__label">Farben</div></div>
+            <div><div class="stat__value" id="statKg">0 kg</div><div class="label stat__label">Filament da</div></div>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+    <section class="shelf" aria-label="Regal">
+        <div class="toolbar"><div class="filters" id="filters"></div></div>
+        <div class="cabinet"><div class="rows" id="rows"></div></div>
+        <div class="empty" id="empty" hidden>Keine Rollen in dieser Auswahl.</div>
+        <div class="shelf__foot">
+            <div class="legend">
+                <span><i style="--hp: var(--hp-70)"></i>700 g</span>
+                <span><i style="--hp: var(--hp-50)"></i>500 g</span>
+                <span><i style="--hp: var(--hp-30)"></i>300 g</span>
+                <span><i style="--hp: var(--hp-10)"></i>100 g</span>
+            </div>
+            <span>Auf eine Rolle tippen für Details und Füllstand</span>
+        </div>
+    </section>
+</div>
+
+<main class="main">
+    <div class="container">
+        <div class="section__head">
+            <div>
+                <p class="label section__label">Nachkaufen</p>
+                <h2 class="section__title">Shops &amp; Aktionen</h2>
+            </div>
+        </div>
+        <div class="shops" id="shops"></div>
+    </div>
+</main>
+
+<footer class="footer">
+    <div class="container footer__inner">
+        <span id="footerInfo">Bergliacht · Filament-Lager</span>
+        <button type="button" id="logout">Abmelden</button>
+    </div>
+</footer>
+
+<button class="fab" type="button" id="addBtn"><span class="fab__plus"><svg class="icon"><use href="#i-plus"/></svg></span><span class="fab__label">Neue Farbe</span></button>
+
+<div class="modal" id="modal" hidden>
+    <div class="modal__backdrop" data-close></div>
+    <div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
+</div>
+
+<div class="toast" id="toast" role="status"><span id="toastText"></span><button type="button" id="toastBtn" hidden>Rückgängig</button></div>
+
+<script>
+/* ==========================================================
+   Daten
+========================================================== */
+
+const SUNLU = "https://store.sunlu.com/de/products/";
+const BAMBU = "https://eu.store.bambulab.com/de/products/";
+
+const ARTEN = {
+    "Sunlu": {
+        "PLA+":       SUNLU + "over-6kg-bundle-sale-pla-and-pla-plus-pla-meta-macaron-filament1kg-roll",
+        "PLA+ 2.0":   SUNLU + "moq-6kg-pla-2-0-upgraded-pla-pla-plus-3d-printer-filament-1kg",
+        "PLA Matte":  SUNLU + "over-6kg-bulk-sale-pla-matte-filament-neatly-wound-filament",
+        "PLA Meta":   SUNLU + "over-6kg-bundle-sales-1-75mm-sunlu-pla-metamacaron-colors-3d-printer-filament-1kg-roll"
+    },
+    "Bambu Lab": {
+        "PLA Basic":        BAMBU + "pla-basic-filament",
+        "PLA Matte":        BAMBU + "pla-matte",
+        "PETG Translucent": BAMBU + "petg-translucent"
+    }
+};
+
+const SHOPS_START = [
+    { marke: "Sunlu", text: "Offizieller Shop, Versand aus dem EU-Lager. Bei jeder Farbe ist „Ship to Europe“ schon ausgewählt.",
+      shop: "https://store.sunlu.com/de", aktion: "https://store.sunlu.com/de/pages/sunlu-halloween-sale",
+      farben: ["#BE9A3A", "#488F77", "#C23031"] },
+    { marke: "Bambu Lab", text: "EU-Shop auf Deutsch, liefert nach Österreich. Einen eigenen AT-Shop gibt es nicht.",
+      shop: "https://eu.store.bambulab.com/de", aktion: "https://eu.store.bambulab.com/de/pages/black-friday-sale",
+      farben: ["#00B1B7", "#F4EE2A", "#BECF00"] }
+];
+
+// [Marke, Art, Name, Hex, Varianten-Parameter, Anzahl, Hinweis]
+const START = [
+    ["Bambu Lab", "PLA Basic", "Schwarz",  "#000000", "?id=43992830017755", 4],
+    ["Bambu Lab", "PLA Basic", "Weiß",     "#FFFFFF", "?id=43992829919451", 4],
+    ["Bambu Lab", "PLA Basic", "Gelb",     "#F4EE2A", "?id=42911328043227", 1],
+    ["Bambu Lab", "PLA Basic", "Türkis",   "#00B1B7", "?id=49636016783708", 1],
+    ["Bambu Lab", "PLA Matte", "Apfelgrün", "#C2E189", "?id=53926028706140", 1],
+
+    ["Sunlu", "PLA+ 2.0", "Silver",                 "#C5CAD1", "?variant=49302308421914", 1],
+    ["Sunlu", "PLA+ 2.0", "Gold",                   "#BE9A3A", "?variant=49302308454682", 1],
+    ["Sunlu", "PLA+ 2.0", "Blue Grey",              "#4380DA", "?variant=49302317367578", 1],
+    ["Sunlu", "PLA+ 2.0", "Dunkelblau",             "#1A25B0", "?variant=49302308290842", 1],
+    ["Sunlu", "PLA+ 2.0", "Anthrazit",              "#737375", "?variant=49302308225306", 1],
+    ["Sunlu", "PLA+ 2.0", "Beige",                  "#EED1BE", "?variant=50890828087578", 1],
+    ["Sunlu", "PLA+ 2.0", "Roasted Chestnut",       "#331E1B", "?variant=50746678116634", 1],
+
+    ["Sunlu", "PLA+", "Midnight",                  "#26273C", "?variant=50755548381466", 1],
+    ["Sunlu", "PLA+", "Grass Green",               "#488F77", "?variant=47250252857626", 1],
+    ["Sunlu", "PLA+", "Ceramic",                   "#E4E5EA", "?variant=50755548512538", 1],
+    ["Sunlu", "PLA+", "Kaffeebraun",               "#5A341C", "?variant=50581338259738", 1],
+    ["Sunlu", "PLA+", "Eiche",                     "#BCA888", "?variant=50755548578074", 3],
+    ["Sunlu", "PLA+", "Knochenweiß",               "#EDE2C6", "?variant=50755548479770", 1],
+    ["Sunlu", "PLA+", "Olive Grün",                "#657149", "?variant=50403703324954", 2],
+    ["Sunlu", "PLA+", "Rot",                       "#C23031", "?variant=44557137084698", 2],
+    ["Sunlu", "PLA+", "Sakura Pink",               "#FEB1BE", "?variant=44560405168410", 1],
+
+    ["Sunlu", "PLA Matte", "Clay",        "#8D7F64", "?variant=50079870386458", 1],
+    ["Sunlu", "PLA Meta",  "Taro Purple", "#C2B3F0", "?variant=50079877988634", 1]
+];
+
+const SPEICHER = "bergliacht-filament-lager";                 // Zwischenspeicher im Browser (schneller Start, offline)
+const KEY_STORE = "bergliacht-filament-lager-schluessel";    // gemerkter Schlüssel bei „angemeldet bleiben“
+const DAY = 864e5;
+const uid = () => Math.random().toString(36).slice(2, 10);
+
+/* Datenstand (eine Datei lager.json im privaten Repo)
+   farben     Farben im Regal, jede mit updated
+   rollen     einzelne Rollen { farbe, g }, jede mit updated
+   shops      Sunlu und Bambu Lab mit Aktions-Link, je mit updated
+   geloescht  id -> Zeitpunkt, damit das Entfernen auf allen Geräten ankommt
+   Startdaten haben feste ids, damit zwei Geräte beim ersten Öffnen nichts doppelt anlegen. */
+function startDaten() {
+    const farben = [], rollen = [];
+    START.forEach(([marke, art, name, hex, param, anzahl, hinweis], i) => {
+        const id = "s" + i;
+        farben.push({ id, marke, art, name, hex, link: param ? ARTEN[marke][art] + param : "", hinweis: hinweis || "", updated: 0 });
+        for (let k = 0; k < anzahl; k++) rollen.push({ id: `s${i}-${k}`, farbe: id, g: 1000, updated: 0 });
+    });
+    return { farben, rollen, shops: SHOPS_START.map(s => ({ ...s, updated: 0 })), geloescht: {} };
+}
+function normiere(s) {
+    const l = startDaten();
+    return {
+        farben: Array.isArray(s.farben) ? s.farben : l.farben,
+        rollen: Array.isArray(s.rollen) ? s.rollen : l.rollen,
+        shops: Array.isArray(s.shops) ? s.shops : l.shops,
+        geloescht: s.geloescht || {},
+    };
+}
+const geaendert = x => { x.updated = Date.now(); return x; };
+const loesche = id => { daten.geloescht[id] = Date.now(); };
+
+let daten = startDaten();
+let filter = { marke: "", art: "" };
+let remote = null;      // { token, repo, file } nach dem Entsperren; null = lokale Vorschau
+let sha = null;         // Stand der Datei auf GitHub
+let dirty = false;      // Änderungen, die noch nicht auf GitHub sind
+let changes = 0;        // zählt Änderungen, um welche während des Hochladens zu erkennen
+let started = false;
+
+function schreibeCache() {
+    try { localStorage.setItem(SPEICHER, JSON.stringify({ daten, sha, dirty })); } catch (e) {}
+}
+function leseCache() {
+    try {
+        const c = JSON.parse(localStorage.getItem(SPEICHER));
+        if (c && c.daten) { daten = normiere(c.daten); sha = c.sha || null; dirty = !!c.dirty; return true; }
+    } catch (e) {}
+    return false;
+}
+
+/* Status oben links */
+function setStatus(art, text) {
+    const el = $("#sync");
+    el.className = "sync" + (art ? " is-" + art : "");
+    el.title = text;
+    $("#syncText").textContent = text;
+    clearTimeout(setStatus.t);
+}
+function zeigeGespeichert() {
+    setStatus("", "Gespeichert");
+    setStatus.t = setTimeout(() => setStatus("", "lager.bergliacht.at"), 2600);
+}
+
+// Jede Änderung landet sofort im Browser und kurz danach auf GitHub
+function speichern() {
+    dirty = true; changes++; schreibeCache();
+    if (!remote) return;
+    setStatus("saving", "Speichert …");
+    clearTimeout(speichern.t);
+    speichern.t = setTimeout(sync, 800);
+}
+
+/* ---------- GitHub: privates Repo mit einer Datei lager.json ---------- */
+
+const b64encode = (s) => {
+    const b = new TextEncoder().encode(s); let out = "";
+    for (let i = 0; i < b.length; i += 0x8000) out += String.fromCharCode(...b.subarray(i, i + 0x8000));
+    return btoa(out);
+};
+const b64decode = (s) => new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\s/g, "")), (c) => c.charCodeAt(0)));
+
+async function api(method, body) {
+    const res = await fetch(`https://api.github.com/repos/${remote.repo}/contents/${remote.file}`, {
+        method, cache: "no-store",
+        headers: {
+            Authorization: `Bearer ${remote.token}`,
+            Accept: "application/vnd.github+json",
+            "X-GitHub-Api-Version": "2022-11-28",
+            ...(body ? { "Content-Type": "application/json" } : {}),
+        },
+        body: body ? JSON.stringify(body) : undefined,
+    });
+    if (res.status === 404 && method === "GET") return null;   // Datei gibt es noch nicht
+    if (!res.ok) { const err = new Error("GitHub " + res.status); err.status = res.status; throw err; }
+    return res.json();
+}
+async function pull() {
+    const res = await api("GET");
+    if (!res) return { daten: null, sha: null };
+    return { daten: normiere(JSON.parse(b64decode(res.content) || "{}")), sha: res.sha };
+}
+
+// Zwei Stände zusammenführen: pro Farbe, Rolle und Shop gewinnt die jüngere Fassung, Entferntes bleibt entfernt
+function mischeListe(a, b, schluessel, geloescht) {
+    const neu = new Map();
+    for (const x of [...a, ...b]) { const o = neu.get(x[schluessel]); if (!o || (x.updated || 0) > (o.updated || 0)) neu.set(x[schluessel], x); }
+    return [...neu.values()].filter(x => !(geloescht[x[schluessel]] >= (x.updated || 0)));
+}
+function merge(a, b) {
+    const geloescht = { ...a.geloescht };
+    for (const [id, t] of Object.entries(b.geloescht)) geloescht[id] = Math.max(geloescht[id] || 0, t);
+    const grenze = Date.now() - 90 * DAY;
+    for (const id of Object.keys(geloescht)) if (geloescht[id] < grenze) delete geloescht[id];
+
+    const farben = mischeListe(a.farben, b.farben, "id", geloescht);
+    const da = new Set(farben.map(f => f.id));
+    const rollen = mischeListe(a.rollen, b.rollen, "id", geloescht).filter(r => da.has(r.farbe));
+    const shops = mischeListe(a.shops, b.shops, "marke", {});
+    return { farben, rollen, shops, geloescht };
+}
+
+function uebernimm(neu) {
+    daten = neu;
+    schreibeCache();
+    if (modal.hidden) { alles(); zeichneShops(); }
+}
+
+async function runSync() {
+    if (!dirty) {
+        const r = await pull();
+        if (r.sha !== sha) { sha = r.sha; if (r.daten) uebernimm(r.daten); }
+        return false;
+    }
+    for (let versuch = 0; versuch < 4; versuch++) {
+        const anfang = changes;
+        const content = b64encode(JSON.stringify({ version: 1, ...daten }, null, 2));
+        try {
+            const res = await api("PUT", { message: "Filament-Lager aktualisiert", content, ...(sha ? { sha } : {}) });
+            sha = res.content.sha;
+            dirty = changes !== anfang;
+            schreibeCache();
+            return true;
+        } catch (err) {
+            // Ein anderes Gerät war schneller: dessen Stand holen, zusammenführen, nochmal
+            if (err.status !== 409 && err.status !== 422) throw err;
+            const r = await pull();
+            sha = r.sha;
+            if (r.daten) uebernimm(merge(daten, r.daten));
+        }
+    }
+    throw new Error("Zu viele gleichzeitige Änderungen");
+}
+
+let busy = false, again = false;
+async function sync() {
+    if (!remote) return;
+    if (busy) { again = true; return; }
+    busy = true;
+    clearTimeout(speichern.t);
+    try {
+        let hochgeladen = false;
+        do { again = false; hochgeladen = (await runSync()) || hochgeladen; } while (again || dirty);
+        if (hochgeladen) zeigeGespeichert();
+        else if (/Offline|Nicht|Zugang/.test($("#syncText").textContent)) setStatus("", "lager.bergliacht.at");
+    } catch (err) {
+        if (err.status === 401 || err.status === 403 || err.status === 404) {
+            const bekannt = $("#syncText").textContent === "Zugang ungültig";
+            setStatus("error", "Zugang ungültig");
+            if (!bekannt) toast("GitHub lehnt den Zugang ab. Token prüfen (siehe README).");
+        } else if (err instanceof TypeError) {
+            setStatus("offline", dirty ? "Offline · wird nachgeholt" : "Offline");
+        } else {
+            setStatus("error", "Nicht gespeichert · antippen");
+        }
+    } finally {
+        busy = false;
+    }
+}
+
+window.addEventListener("online", sync);
+// Beim Zurückkehren zur App den Stand vom anderen Gerät holen
+document.addEventListener("visibilitychange", () => { if (started) sync(); });
+setInterval(() => { if (started && document.visibilityState === "visible") sync(); }, 60000);
+
+/* ==========================================================
+   Farben sortieren (Weiß → Grau → Schwarz, dann Regenbogen)
+========================================================== */
+
+function hsl(hex) {
+    const n = parseInt(hex.replace("#", "").slice(0, 6), 16);
+    const r = (n >> 16 & 255) / 255, g = (n >> 8 & 255) / 255, b = (n & 255) / 255;
+    const max = Math.max(r, g, b), min = Math.min(r, g, b), l = (max + min) / 2, d = max - min;
+    let h = 0, s = 0;
+    if (d) {
+        s = d / (1 - Math.abs(2 * l - 1));
+        h = max === r ? ((g - b) / d) % 6 : max === g ? (b - r) / d + 2 : (r - g) / d + 4;
+        h = (h * 60 + 360) % 360;
+    }
+    return { h, s, l };
+}
+function sortWert(farbe) {
+    const { h, s, l } = hsl(farbe.hex.split(",")[0]);
+    if (farbe.hex.includes(",")) return 3;                  // Mehrfarbig ans Ende
+    if (s < .14 || l > .9 || l < .1) return 1 - l;          // Weiß → Grau → Schwarz
+    if (h < 60 && (s < .3 || l < .3 || l > .65)) return 1 + l;  // Braun- und Beigetöne: dunkel → hell
+    return 2 + (h >= 355 ? 0 : h) / 360;                                   // Bunt: Rot → Gelb → Grün → Blau → Lila → Rosa
+}
+function farbHintergrund(hex) {
+    const teile = hex.split(",");
+    if (teile.length === 1) return hex;
+    return `conic-gradient(from 20deg, ${teile.map((c, i) => `${c} ${i / teile.length * 360}deg`).join(",")}, ${teile[0]} 360deg)`;
+}
+
+/* ==========================================================
+   Darstellung
+========================================================== */
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const STUFEN = [1000, 700, 500, 300, 100];
+
+function spoolHtml(farbe, g, extra = "") {
+    const inset = 6 + (1 - g / 1000) * 24;  // volle Rolle: dicker Filamentring, fast leer: dünn
+    const holes = [0, 60, 120, 180, 240, 300].map(a => `<i style="--a:${a}deg"></i>`).join("");
+    return `<div class="spool" ${extra}>
+        <div class="spool__fil" style="--c:${farbHintergrund(farbe.hex)}; --inset:${inset}%"></div>
+        <div class="spool__hub"><div class="spool__holes">${holes}</div></div>
+    </div>`;
+}
+function hpHtml(g) {
+    const an = g / 100;
+    return `<div class="hp hp--${g / 10}">${Array.from({ length: 10 }, (_, i) => `<i class="${i < an ? "on" : ""}"></i>`).join("")}</div>`;
+}
+
+function sichtbar(f) {
+    return (!filter.marke || f.marke === filter.marke) && (!filter.art || f.art === filter.art);
+}
+
+function zeichneFilter() {
+    const zaehle = fn => daten.rollen.filter(r => { const f = daten.farben.find(f => f.id === r.farbe); return f && fn(f); }).length;
+    const marken = ["Sunlu", "Bambu Lab"];
+    const arten = [...new Set(daten.farben.filter(f => !filter.marke || f.marke === filter.marke).map(f => f.art))]
+        .sort((a, b) => a.localeCompare(b, "de"));
+    let html = `<button class="filter ${!filter.marke && !filter.art ? "is-active" : ""}" data-f="alle">Alle <small>${daten.rollen.length}</small></button>`;
+    html += marken.map(m => `<button class="filter ${filter.marke === m ? "is-active" : ""}" data-marke="${m}">${m} <small>${zaehle(f => f.marke === m)}</small></button>`).join("");
+    html += `<span class="filter__sep"></span>`;
+    html += arten.map(a => `<button class="filter ${filter.art === a ? "is-active" : ""}" data-art="${esc(a)}">${esc(a)} <small>${zaehle(f => f.art === a && (!filter.marke || f.marke === filter.marke))}</small></button>`).join("");
+    $("#filters").innerHTML = html;
+}
+
+function zeichneRegal() {
+    const farben = daten.farben.filter(sichtbar).sort((a, b) => sortWert(a) - sortWert(b) || a.name.localeCompare(b.name, "de"));
+    let html = "", n = 0;
+    farben.forEach(f => {
+        const rollen = daten.rollen.filter(r => r.farbe === f.id).sort((a, b) => a.g - b.g);
+        const titel = `${f.name} · ${f.marke} ${f.art}`;
+        if (!rollen.length) {
+            html += `<div class="cell" style="animation-delay:${n++ * 18}ms">
+                <button class="cell__btn" data-farbe="${f.id}" title="${esc(titel)} · keine Rolle mehr" aria-label="${esc(titel)}, keine Rolle mehr">
+                    <div class="ghost" style="--c:${farbHintergrund(f.hex)}"><span>leer</span></div>
+                </button></div>`;
+            return;
+        }
+        rollen.forEach(r => {
+            html += `<div class="cell" style="animation-delay:${n++ * 18}ms">
+                <button class="cell__btn" data-rolle="${r.id}" title="${esc(titel)}" aria-label="${esc(titel)}, ${r.g} Gramm">
+                    ${spoolHtml(f, r.g)}${f.hinweis ? `<span class="badge" aria-hidden="true">?</span>` : ""}
+                </button>
+                ${r.g < 1000 ? hpHtml(r.g) : ""}
+            </div>`;
+        });
+    });
+    $("#rows").innerHTML = html;
+    $("#empty").hidden = !!farben.length;
+    $(".cabinet").hidden = !farben.length;
+
+    const gramm = daten.rollen.reduce((s, r) => s + r.g, 0);
+    $("#statRollen").textContent = daten.rollen.length;
+    $("#statFarben").textContent = daten.farben.length;
+    $("#statKg").textContent = (gramm / 1000).toLocaleString("de-AT", { maximumFractionDigits: 1 }) + " kg";
+}
+
+function zeichneShops() {
+    $("#shops").innerHTML = daten.shops.map((s, i) => `
+        <article class="shop">
+            <div class="shop__dots" aria-hidden="true">${s.farben.map(c => `<i style="--c:${c}"></i>`).join("")}</div>
+            <p class="label shop__label">${s.marke === "Sunlu" ? "PLA+ · PLA+ 2.0 · PLA Matte · PLA Meta" : "PLA Basic · PLA Matte · PETG Translucent"}</p>
+            <h3 class="shop__name">${s.marke}</h3>
+            <p class="shop__text">${esc(s.text)}</p>
+            <div class="shop__actions">
+                <a class="btn btn--light" href="${esc(s.aktion)}" target="_blank" rel="noopener"><svg class="icon"><use href="#i-tag"/></svg>Aktionen</a>
+                <a class="btn btn--ghost" href="${esc(s.shop)}" target="_blank" rel="noopener">Zum Shop<svg class="icon"><use href="#i-ext"/></svg></a>
+            </div>
+            <button class="icon-btn shop__edit" data-shop="${i}" title="Aktions-Link ändern" aria-label="Aktions-Link von ${s.marke} ändern"><svg class="icon"><use href="#i-edit"/></svg></button>
+        </article>`).join("");
+}
+
+function alles() { zeichneFilter(); zeichneRegal(); }
+
+/* ==========================================================
+   Popups
+========================================================== */
+
+const modal = $("#modal"), sheet = $("#sheet");
+let zuletztFokus = null;
+
+function oeffne(html) {
+    zuletztFokus = document.activeElement;
+    sheet.innerHTML = `<span class="tape"></span><button class="icon-btn sheet__close" data-close aria-label="Schließen"><svg class="icon"><use href="#i-x"/></svg></button>` + html;
+    modal.hidden = false;
+    requestAnimationFrame(() => modal.classList.add("is-open"));
+}
+function schliesse() {
+    modal.classList.remove("is-open");
+    setTimeout(() => { modal.hidden = true; zuletztFokus && zuletztFokus.focus && zuletztFokus.focus(); }, 220);
+}
+
+function zeigeRolle(rolleId) {
+    const r = daten.rollen.find(r => r.id === rolleId);
+    if (!r) return schliesse();
+    const f = daten.farben.find(f => f.id === r.farbe);
+    const alle = daten.rollen.filter(x => x.farbe === f.id);
+    const voll = alle.filter(x => x.g === 1000).length;
+    oeffne(`
+        <div class="detail__head">
+            ${spoolHtml(f, r.g)}
+            <div class="detail__meta">
+                <p class="label detail__brand">${esc(f.marke)} · ${esc(f.art)}</p>
+                <h2 class="detail__name">${esc(f.name)}</h2>
+                <span class="detail__hex"><i style="--c:${farbHintergrund(f.hex)}"></i>${esc(f.hex.toUpperCase().replace(/,/g, " · "))}</span>
+                <p class="detail__count">${alle.length === 1 ? "Deine einzige Rolle in dieser Farbe" : `${alle.length} Rollen in dieser Farbe, ${voll} davon voll`}</p>
+            </div>
+        </div>
+        ${f.hinweis ? `<div class="note"><svg class="icon"><use href="#i-warn"/></svg><span>${esc(f.hinweis)}</span></div>` : ""}
+        <div class="sheet__group">
+            <span class="label">Füllstand dieser Rolle</span>
+            <div class="levels">${STUFEN.map(g => `
+                <button class="level ${r.g === g ? "is-active" : ""}" data-level="${g}">
+                    ${g === 1000 ? "Voll" : g + " g"}
+                    ${g === 1000 ? "<small>1000 g</small>" : hpHtml(g)}
+                </button>`).join("")}
+            </div>
+        </div>
+        <div class="sheet__actions">
+            <button class="btn btn--line" data-neue-rolle="${f.id}"><svg class="icon"><use href="#i-plus"/></svg>Rolle dazu</button>
+            <button class="btn btn--empty" data-leer="${r.id}"><svg class="icon"><use href="#i-trash"/></svg>Leer · entfernen</button>
+        </div>
+        <div class="sheet__foot">
+            <button class="link-soft" data-bearbeiten="${f.id}">Farbe bearbeiten</button>
+            ${f.link
+                ? `<a class="btn btn--dark" href="${esc(f.link)}" target="_blank" rel="noopener">Im Shop ansehen<svg class="icon"><use href="#i-ext"/></svg></a>`
+                : `<span class="link-soft" style="margin-left:auto">Kein Shop-Link hinterlegt</span>`}
+        </div>`);
+    sheet.dataset.rolle = r.id;
+}
+
+function zeigeLeereFarbe(farbeId) {
+    const f = daten.farben.find(f => f.id === farbeId);
+    oeffne(`
+        <div class="detail__head">
+            <div class="ghost" style="--c:${farbHintergrund(f.hex)}; width:6rem; height:6rem; flex:none"></div>
+            <div class="detail__meta">
+                <p class="label detail__brand">${esc(f.marke)} · ${esc(f.art)}</p>
+                <h2 class="detail__name">${esc(f.name)}</h2>
+                <p class="detail__count">Keine Rolle mehr da. Der Platz bleibt frei, damit du ans Nachkaufen denkst.</p>
+            </div>
+        </div>
+        <div class="sheet__actions">
+            <button class="btn btn--dark" data-neue-rolle="${f.id}"><svg class="icon"><use href="#i-plus"/></svg>Neue Rolle eintragen</button>
+            ${f.link ? `<a class="btn btn--line" href="${esc(f.link)}" target="_blank" rel="noopener">Nachkaufen<svg class="icon"><use href="#i-ext"/></svg></a>` : ""}
+        </div>
+        <div class="sheet__foot">
+            <button class="link-danger" data-farbe-loeschen="${f.id}">Farbe ganz aus dem Regal nehmen</button>
+            <button class="link-soft" data-bearbeiten="${f.id}" style="margin-left:auto">Bearbeiten</button>
+        </div>`);
+}
+
+function zeigeFormular(farbeId) {
+    const f = farbeId ? daten.farben.find(f => f.id === farbeId) : { marke: "Sunlu", art: "PLA+", name: "", hex: "#6A4B3B", link: "" };
+    const neu = !farbeId;
+    let anzahl = 1;
+    oeffne(`
+        <h2 class="sheet__title">${neu ? "Neue Farbe ins Regal" : "Farbe bearbeiten"}</h2>
+        <form class="form" id="form" novalidate>
+            <div class="field"><span class="label">Marke</span><div class="chips" id="fMarke"></div></div>
+            <div class="field"><span class="label">Filamentart</span><div class="chips" id="fArt"></div></div>
+            <div class="field">
+                <label class="label" for="fName">Farbname</label>
+                <input class="soft-input" id="fName" value="${esc(f.name)}" placeholder="z. B. Sky Blue" autocomplete="off" required>
+            </div>
+            <div class="field">
+                <label class="label" for="fHex">Farbe <em>· Hex-Code</em></label>
+                <div class="color-row"><input type="color" id="fPick" value="${f.hex.split(",")[0]}" aria-label="Farbe wählen"><input class="soft-input" id="fHex" value="${esc(f.hex.toUpperCase())}" autocomplete="off" spellcheck="false"></div>
+                <p class="hint">Mehrfarbig: mehrere Codes mit Komma, z. B. #3E4C7A,#8A4F86</p>
+            </div>
+            <div class="${neu ? "two" : ""}">
+                <div class="field">
+                    <label class="label" for="fLink">Shop-Link <em>· direkt zur Farbe</em></label>
+                    <input class="soft-input" id="fLink" value="${esc(f.link)}" placeholder="Leer = Produktseite der Filamentart" autocomplete="off" inputmode="url">
+                </div>
+                ${neu ? `<div class="field"><span class="label">Rollen</span>
+                    <div class="stepper"><button type="button" id="fMinus" aria-label="Weniger">−</button><output id="fAnzahl">1</output><button type="button" id="fPlus" aria-label="Mehr">+</button></div></div>` : ""}
+            </div>
+        </form>
+        <div class="sheet__foot">
+            ${neu ? "" : `<button class="link-danger" data-farbe-loeschen="${f.id}">Farbe löschen</button>`}
+            <button class="btn btn--dark" id="fSave">${neu ? "Ins Regal stellen" : "Speichern"}</button>
+        </div>`);
+
+    let marke = f.marke, art = f.art;
+    const chips = () => {
+        $("#fMarke").innerHTML = Object.keys(ARTEN).map(m => `<button type="button" class="chip ${m === marke ? "is-active" : ""}" data-m="${m}">${m}</button>`).join("");
+        if (!ARTEN[marke][art]) art = Object.keys(ARTEN[marke])[0];
+        $("#fArt").innerHTML = Object.keys(ARTEN[marke]).map(a => `<button type="button" class="chip ${a === art ? "is-active" : ""}" data-a="${a}">${a}</button>`).join("");
+    };
+    chips();
+    $("#fMarke").onclick = e => { const b = e.target.closest("[data-m]"); if (b) { marke = b.dataset.m; chips(); } };
+    $("#fArt").onclick = e => { const b = e.target.closest("[data-a]"); if (b) { art = b.dataset.a; chips(); } };
+    $("#fPick").oninput = e => { $("#fHex").value = e.target.value.toUpperCase(); };
+    $("#fHex").oninput = e => { const v = e.target.value.trim().split(",")[0]; if (/^#[0-9a-f]{6}$/i.test(v)) $("#fPick").value = v; };
+    if (neu) {
+        $("#fMinus").onclick = () => { anzahl = Math.max(1, anzahl - 1); $("#fAnzahl").textContent = anzahl; };
+        $("#fPlus").onclick = () => { anzahl = Math.min(20, anzahl + 1); $("#fAnzahl").textContent = anzahl; };
+    }
+    setTimeout(() => neu && $("#fName").focus(), 260);
+
+    $("#fSave").onclick = () => {
+        const name = $("#fName").value.trim();
+        const hex = $("#fHex").value.replace(/\s/g, "").split(",").filter(c => /^#[0-9a-f]{6}$/i.test(c)).join(",");
+        if (!name) { $("#fName").focus(); return toast("Bitte einen Farbnamen eingeben"); }
+        if (!hex) { $("#fHex").focus(); return toast("Der Hex-Code sieht so aus: #A1B2C3"); }
+        const link = $("#fLink").value.trim() || ARTEN[marke][art];
+        if (neu) {
+            const id = uid();
+            daten.farben.push(geaendert({ id, marke, art, name, hex, link, hinweis: "" }));
+            for (let i = 0; i < anzahl; i++) daten.rollen.push(geaendert({ id: uid(), farbe: id, g: 1000 }));
+            toast(`${name} steht jetzt im Regal`);
+        } else {
+            // über die id suchen, falls ein Sync das Regal inzwischen ersetzt hat
+            const ziel = daten.farben.find(x => x.id === farbeId);
+            if (!ziel) { schliesse(); return toast("Diese Farbe wurde inzwischen entfernt"); }
+            geaendert(Object.assign(ziel, { marke, art, name, hex, link, hinweis: "" }));
+            toast("Gespeichert");
+        }
+        speichern(); alles(); schliesse();
+    };
+}
+
+function zeigeShopLink(i) {
+    const s = daten.shops[i];
+    oeffne(`
+        <h2 class="sheet__title">Aktionen bei ${s.marke}</h2>
+        <p class="hint" style="font-size:var(--font-size-sm)">Die Shops wechseln ihre Aktionsseiten (z. B. Halloween, Black Friday). Hier kannst du den Link anpassen.</p>
+        <div class="form">
+            <div class="field"><label class="label" for="sAktion">Link zu den Aktionen</label><input class="soft-input" id="sAktion" value="${esc(s.aktion)}" inputmode="url"></div>
+        </div>
+        <div class="sheet__foot"><button class="btn btn--dark" id="sSave">Speichern</button></div>`);
+    $("#sSave").onclick = () => { const z = daten.shops.find(x => x.marke === s.marke) || s; z.aktion = $("#sAktion").value.trim() || z.shop; geaendert(z); speichern(); zeichneShops(); schliesse(); toast("Link gespeichert"); };
+}
+
+/* ==========================================================
+   Aktionen
+========================================================== */
+
+let toastTimer, rueckgaengig = null;
+function toast(text, undo) {
+    $("#toastText").textContent = text;
+    rueckgaengig = undo || null;
+    $("#toastBtn").hidden = !undo;
+    $("#toast").classList.add("is-visible");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => $("#toast").classList.remove("is-visible"), undo ? 6000 : 2600);
+}
+$("#toastBtn").onclick = () => { if (rueckgaengig) { rueckgaengig(); rueckgaengig = null; } $("#toast").classList.remove("is-visible"); };
+
+function merke() { return JSON.stringify(daten); }
+// Rückgängig: alter Stand mit neuem Zeitpunkt, damit er auch auf anderen Geräten wieder gilt
+function zurueck(stand) {
+    return () => {
+        const alt = JSON.parse(stand), t = Date.now();
+        const altIds = new Set([...alt.farben, ...alt.rollen].map(x => x.id));
+        for (const x of [...daten.farben, ...daten.rollen]) if (!altIds.has(x.id)) daten.geloescht[x.id] = t;
+        for (const x of [...alt.farben, ...alt.rollen, ...alt.shops]) { x.updated = t; delete daten.geloescht[x.id]; }
+        daten = { ...alt, geloescht: daten.geloescht };
+        speichern(); alles(); zeichneShops();
+    };
+}
+
+$("#rows").onclick = e => {
+    const b = e.target.closest(".cell__btn"); if (!b) return;
+    b.dataset.rolle ? zeigeRolle(b.dataset.rolle) : zeigeLeereFarbe(b.dataset.farbe);
+};
+$("#filters").onclick = e => {
+    const b = e.target.closest(".filter"); if (!b) return;
+    if (b.dataset.f) filter = { marke: "", art: "" };
+    if (b.dataset.marke) filter = { marke: filter.marke === b.dataset.marke ? "" : b.dataset.marke, art: "" };
+    if (b.dataset.art) filter.art = filter.art === b.dataset.art ? "" : b.dataset.art;
+    alles();
+};
+$("#shops").onclick = e => { const b = e.target.closest("[data-shop]"); if (b) zeigeShopLink(+b.dataset.shop); };
+$("#addBtn").onclick = () => zeigeFormular();
+
+modal.addEventListener("click", e => {
+    if (e.target.closest("[data-close]")) return schliesse();
+    const lv = e.target.closest("[data-level]");
+    if (lv) {
+        // Während das Popup offen war, kann ein Sync das Regal ersetzt haben: deshalb über die id suchen
+        const r = daten.rollen.find(r => r.id === sheet.dataset.rolle);
+        if (!r) return schliesse();
+        r.g = +lv.dataset.level; geaendert(r); speichern(); zeichneRegal(); zeigeRolleNeu(r.id); return;
+    }
+    const neu = e.target.closest("[data-neue-rolle]");
+    if (neu) {
+        const s = merke();
+        const f = daten.farben.find(f => f.id === neu.dataset.neueRolle);
+        if (!f) return schliesse();
+        const r = geaendert({ id: uid(), farbe: f.id, g: 1000 });
+        daten.rollen.push(r); speichern(); alles(); schliesse();
+        toast(`Neue Rolle ${f.name} eingetragen`, zurueck(s)); return;
+    }
+    const leer = e.target.closest("[data-leer]");
+    if (leer) {
+        const s = merke();
+        const r = daten.rollen.find(r => r.id === leer.dataset.leer);
+        if (!r) return schliesse();
+        const f = daten.farben.find(f => f.id === r.farbe);
+        daten.rollen = daten.rollen.filter(x => x !== r); loesche(r.id); speichern(); alles(); schliesse();
+        const rest = daten.rollen.filter(x => x.farbe === f.id).length;
+        toast(rest ? `Rolle ${f.name} entfernt` : `Letzte Rolle ${f.name} entfernt · Platz bleibt frei`, zurueck(s)); return;
+    }
+    const bearb = e.target.closest("[data-bearbeiten]");
+    if (bearb) { zeigeFormular(bearb.dataset.bearbeiten); return; }
+    const del = e.target.closest("[data-farbe-loeschen]");
+    if (del) {
+        const s = merke();
+        const f = daten.farben.find(f => f.id === del.dataset.farbeLoeschen);
+        if (!f) return schliesse();
+        daten.rollen.filter(x => x.farbe === f.id).forEach(x => loesche(x.id));
+        loesche(f.id);
+        daten.farben = daten.farben.filter(x => x !== f);
+        daten.rollen = daten.rollen.filter(x => x.farbe !== f.id);
+        speichern(); alles(); schliesse(); toast(`${f.name} aus dem Regal genommen`, zurueck(s));
+    }
+});
+// Füllstand ändern ohne das Popup neu „aufploppen“ zu lassen
+function zeigeRolleNeu(id) {
+    const offen = modal.classList.contains("is-open");
+    zeigeRolle(id);
+    if (offen) modal.classList.add("is-open");
+}
+document.addEventListener("keydown", e => { if (e.key === "Escape" && !modal.hidden) schliesse(); });
+
+/* ==========================================================
+   Anmeldung: PBKDF2-SHA256 -> AES-256-CBC + HMAC-SHA256
+   zugang.json enthält den GitHub-Zugang, verschlüsselt mit dem Passwort
+   (erzeugt von werkzeuge/einrichten.ps1). Fehlt die Datei, läuft die lokale Vorschau.
+========================================================== */
+
+let payload = null;
+const fromB64 = (s) => Uint8Array.from(atob(s), (c) => c.charCodeAt(0));
+const toB64 = (a) => btoa(String.fromCharCode(...a));
+
+async function deriveKey(password) {
+    const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(password), "PBKDF2", false, ["deriveBits"]);
+    const bits = await crypto.subtle.deriveBits({ name: "PBKDF2", hash: "SHA-256", salt: fromB64(payload.salt), iterations: payload.iter }, base, 512);
+    return new Uint8Array(bits);
+}
+async function decrypt(keyBytes) {
+    const encKey = await crypto.subtle.importKey("raw", keyBytes.slice(0, 32), "AES-CBC", false, ["decrypt"]);
+    const macKey = await crypto.subtle.importKey("raw", keyBytes.slice(32), { name: "HMAC", hash: "SHA-256" }, false, ["verify"]);
+    const iv = fromB64(payload.iv), data = fromB64(payload.data);
+    const signed = new Uint8Array(iv.length + data.length);
+    signed.set(iv); signed.set(data, iv.length);
+    if (!await crypto.subtle.verify("HMAC", macKey, fromB64(payload.mac), signed)) throw new Error("Falsches Passwort");
+    const plain = await crypto.subtle.decrypt({ name: "AES-CBC", iv }, encKey, data);
+    return JSON.parse(new TextDecoder().decode(plain));
+}
+function rememberKey(keyBytes) {
+    try { localStorage.setItem(KEY_STORE, JSON.stringify({ salt: payload.salt, key: toB64(keyBytes) })); } catch (e) {}
+}
+function forgetKey() {
+    try { localStorage.removeItem(KEY_STORE); } catch (e) {}
+}
+function storedKey() {
+    try {
+        const s = JSON.parse(localStorage.getItem(KEY_STORE));
+        return s && s.salt === payload.salt ? fromB64(s.key) : null;
+    } catch (e) { return null; }
+}
+
+async function start(access) {
+    remote = access;
+    started = true;
+    $("#footerInfo").textContent = remote ? "Bergliacht · Filament-Lager" : "Lokale Vorschau · gespeichert nur in diesem Browser";
+    const cached = leseCache();
+    $("#lock").classList.add("is-leaving");
+    document.body.classList.remove("is-locked");
+    zeichneShops();
+    if (remote && !cached) {
+        $("#rows").innerHTML = "";
+        $(".cabinet").hidden = true;
+        $("#empty").hidden = false;
+        $("#empty").className = "loading";
+        $("#empty").textContent = "Regal wird geladen …";
+    } else alles();
+    if (!remote) return;
+    await sync();
+    if (!cached) {
+        $("#empty").className = "empty";
+        $("#empty").textContent = "Keine Rollen in dieser Auswahl.";
+        // Neues, leeres Daten-Repo: Startbestand hochladen
+        if (!sha) speichern();
+        alles(); zeichneShops();
+    }
+}
+
+const lockForm = $("#lockForm"), lockInput = $("#lockInput"), lockButton = $("#lockButton"), lockError = $("#lockError");
+function fail(message) {
+    lockError.textContent = message;
+    lockForm.classList.remove("is-error"); void lockForm.offsetWidth; lockForm.classList.add("is-error");
+    lockInput.select();
+}
+lockForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    if (!lockInput.value) return fail("");
+    lockButton.disabled = true;
+    lockButton.textContent = "Wird entsperrt …";
+    lockError.textContent = "";
+    try {
+        if (!payload) return start(null);
+        const key = await deriveKey(lockInput.value);
+        const access = await decrypt(key);
+        if ($("#lockRemember").checked) rememberKey(key); else forgetKey();
+        lockInput.value = "";
+        start(access);
+    } catch (err) {
+        fail("Das Passwort stimmt nicht.");
+    } finally {
+        lockButton.disabled = false;
+        lockButton.textContent = "Entsperren";
+    }
+});
+
+function logout() {
+    if (dirty && remote && !confirm("Noch nicht alles ist auf GitHub gespeichert. Trotzdem abmelden?")) return;
+    forgetKey();
+    try { localStorage.removeItem(SPEICHER); } catch (e) {}
+    location.href = location.pathname;
+}
+$("#lockBtn").addEventListener("click", logout);
+$("#logout").addEventListener("click", logout);
+$("#sync").addEventListener("click", () => { if (started) sync(); });
+
+// Beim Laden: gemerkten Schlüssel ausprobieren, sonst Passwort abfragen
+(async () => {
+    try { const r = await fetch("zugang.json", { cache: "no-store" }); if (r.ok) payload = await r.json(); } catch (e) {}
+    $("#lockHint").hidden = !!payload;
+    const key = payload && storedKey();
+    if (key) {
+        try { return start(await decrypt(key)); } catch (e) { forgetKey(); }
+    }
+    $("#lock").classList.remove("is-checking");
+    lockInput.focus();
+})();
+</script>
+</body>
+</html>
