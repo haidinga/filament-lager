@@ -931,6 +931,42 @@ async function runSync() {
     throw new Error("Zu viele gleichzeitige Änderungen");
 }
 
+/* ---------- Farbliste für die Modell-Galerie ----------
+   Kunden der Galerie sehen, welche Farben es gibt. Dafür liegt im Schaufenster-Repo der Galerie
+   eine farben.json mit Name, Art, Hex und ob gerade eine Rolle da ist. Keine Füllstände, keine Links.
+   Klappt das nicht (Token ohne Zugriff), läuft das Lager ganz normal weiter. */
+const GALERIE_REPO = "haidinga/modell-galerie-schaufenster";
+let galerieText = null, galerieSha = null;
+function galerieFarbenAus(d) {
+    const da = new Set(d.rollen.map(r => r.farbe));
+    return {
+        version: 1,
+        farben: [...d.farben].sort((a, b) => sortWert(a) - sortWert(b) || a.name.localeCompare(b.name, "de"))
+            .map(f => ({ id: f.id, name: f.name, art: f.art, hex: f.hex, verfuegbar: da.has(f.id) })),
+    };
+}
+async function galerieFarben() {
+    const text = JSON.stringify(galerieFarbenAus(daten), null, 2);
+    if (text === galerieText) return;
+    const url = `https://api.github.com/repos/${GALERIE_REPO}/contents/farben.json`;
+    const kopf = { Authorization: `Bearer ${remote.token}`, Accept: "application/vnd.github+json", "X-GitHub-Api-Version": "2022-11-28" };
+    for (let versuch = 0; versuch < 3; versuch++) {
+        const alt = await fetch(url, { cache: "no-store", headers: kopf });
+        if (alt.ok) {
+            const j = await alt.json();
+            galerieSha = j.sha;
+            if (b64decode(j.content) === text) { galerieText = text; return; }
+        } else if (alt.status === 404) galerieSha = null;
+        else { galerieText = text; return; }   // kein Zugriff: still bleiben, erst bei der nächsten Änderung wieder probieren
+        const res = await fetch(url, {
+            method: "PUT", headers: { ...kopf, "Content-Type": "application/json" },
+            body: JSON.stringify({ message: "Farben aus dem Filament-Lager", content: b64encode(text), ...(galerieSha ? { sha: galerieSha } : {}) }),
+        });
+        if (res.ok) { galerieSha = (await res.json()).content.sha; galerieText = text; return; }
+        if (res.status !== 409 && res.status !== 422) { galerieText = text; return; }
+    }
+}
+
 let busy = false, again = false;
 async function sync() {
     if (!remote) return;
@@ -940,6 +976,7 @@ async function sync() {
     try {
         let hochgeladen = false;
         do { again = false; hochgeladen = (await runSync()) || hochgeladen; } while (again || dirty);
+        try { await galerieFarben(); } catch (e) {}
         if (hochgeladen) zeigeGespeichert();
         else if (/Offline|Nicht|Zugang/.test($("#syncText").textContent)) setStatus("", "lager.bergliacht.at");
     } catch (err) {
