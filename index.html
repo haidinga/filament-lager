@@ -429,6 +429,17 @@ svg.icon { width: 1.25rem; height: 1.25rem; flex: none; fill: none; stroke: curr
 .detail__hex i { width: 1rem; height: 1rem; border-radius: 50%; background: var(--c); box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .15); }
 .detail__count { margin-top: var(--space-2); font-size: var(--font-size-sm); color: var(--color-text-secondary); }
 
+.temps {
+    display: grid; grid-template-columns: auto auto minmax(0, 1fr); align-items: center; gap: var(--space-2) var(--space-4);
+    margin-top: var(--space-5); padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-sm);
+    background: rgba(255, 255, 255, .5);
+    border: 1px solid rgba(59, 52, 45, .1);
+}
+.temp { display: flex; flex-direction: column; line-height: 1.2; }
+.temp .label { font-size: .65rem; color: var(--color-text-muted); }
+.temp strong { font-size: var(--font-size-lg); font-weight: 500; letter-spacing: -.01em; white-space: nowrap; }
+.temps__info { font-size: var(--font-size-xs); color: var(--color-text-muted); line-height: 1.35; text-align: right; }
 .note {
     display: flex; gap: var(--space-3); align-items: flex-start;
     margin-top: var(--space-5); padding: var(--space-3) var(--space-4);
@@ -624,6 +635,8 @@ body.is-locked { overflow: hidden; }
     .rows { margin: 0 calc(-1 * var(--space-2)); padding: 0 var(--space-2); }
     .hp { height: .55rem; bottom: calc((var(--board) - .55rem) / 2 - 1px); gap: 1px; padding: 1px; }
     .shelf__foot { font-size: var(--font-size-xs); }
+    .temps { grid-template-columns: auto auto; }
+    .temps__info { grid-column: 1 / -1; text-align: left; }
     .kauf { gap: var(--space-3); }
     .kauf__info { gap: var(--space-3); }
     .kauf__stand { white-space: nowrap; }
@@ -788,6 +801,33 @@ const ARTEN = {
         "PETG Translucent": BAMBU + "petg-translucent"
     }
 };
+
+/* Temperaturen für Patricks normales Drucken: Bambu Lab A1, Geschwindigkeit 100 % (Profil „0.20mm Standard“:
+   Außenwand 200, Innenwand 300, Füllung 270 mm/s). Darum jeweils die schnelle Stufe von Sunlu, davon der Mittelwert.
+   Quelle: Datentabelle der Sunlu-Produktseite (bei PLA Meta, Silk PLA+ und HS PLA+ 2.0 die Beschreibung).
+   [Druck °C, Platte °C, Sunlu-Bereich Druck, Sunlu-Bereich Platte] */
+const TEMPERATUREN = {
+    "Sunlu": {
+        "PLA+":                 [230, 55, "215–245 °C bei 100–200 mm/s", "50–60 °C"],
+        "PLA+ 2.0":             [230, 55, "215–245 °C bei 100–200 mm/s", "50–60 °C"],
+        "PLA Matte":            [230, 55, "215–245 °C bei 100–230 mm/s", "50–60 °C"],
+        "PLA Meta":             [210, 58, "195–225 °C bei 100–200 mm/s", "50–65 °C"],
+        "PLA":                  [225, 55, "210–240 °C bei 100–200 mm/s", "50–60 °C"],
+        "High Speed PLA+ 2.0":  [223, 60, "215–230 °C bei 150–300 mm/s", "55–65 °C"],
+        "High Speed Matte PLA": [220, 55, "210–230 °C bei 150–300 mm/s", "50–60 °C"],
+        "Silk PLA+":            [225, 55, "215–235 °C bei 100–200 mm/s", "50–60 °C"],
+        "Silk PLA+ Dual Color": [220, 55, "210–230 °C bei 50–200 mm/s", "50–60 °C"]
+    }
+};
+function tempHtml(f) {
+    const t = (TEMPERATUREN[f.marke] || {})[f.art];
+    if (!t) return "";
+    return `<div class="temps" title="Sunlu: Druck ${t[2]}, Platte ${t[3]}">
+        <div class="temp"><span class="label">Druck</span><strong>${t[0]} °C</strong></div>
+        <div class="temp"><span class="label">Platte</span><strong>${t[1]} °C</strong></div>
+        <p class="temps__info">Mittelwert von Sunlu für den A1 bei 100 %<br>Sunlu: ${t[2]}</p>
+    </div>`;
+}
 
 const SHOPS_START = [
     { marke: "Sunlu", text: "Offizieller Shop, Versand aus dem EU-Lager. Bei jeder Farbe ist „Ship to Europe“ schon ausgewählt.",
@@ -1224,6 +1264,7 @@ function zeigeRolle(rolleId) {
             </div>
         </div>
         ${f.hinweis ? `<div class="note"><svg class="icon"><use href="#i-warn"/></svg><span>${esc(f.hinweis)}</span></div>` : ""}
+        ${tempHtml(f)}
         <div class="sheet__group">
             <span class="label">Füllstand dieser Rolle</span>
             <div class="levels">${STUFEN.map(g => `
@@ -1257,6 +1298,7 @@ function zeigeLeereFarbe(farbeId) {
                 <p class="detail__count">Keine Rolle mehr da. Der Platz bleibt frei, damit du ans Nachkaufen denkst.</p>
             </div>
         </div>
+        ${tempHtml(f)}
         <div class="sheet__actions">
             <button class="btn btn--dark" data-neue-rolle="${f.id}"><svg class="icon"><use href="#i-plus"/></svg>Neue Rolle eintragen</button>
             ${f.link ? `<a class="btn btn--line" href="${esc(f.link)}" target="_blank" rel="noopener">Nachkaufen<svg class="icon"><use href="#i-ext"/></svg></a>` : ""}
