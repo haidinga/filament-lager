@@ -320,6 +320,35 @@ svg.icon { width: 1.25rem; height: 1.25rem; flex: none; fill: none; stroke: curr
 .section__head { display: flex; justify-content: space-between; align-items: flex-end; gap: var(--space-4); margin-bottom: var(--space-6); flex-wrap: wrap; }
 .section__label { color: var(--color-text-muted); margin-bottom: var(--space-2); }
 .section__title { font-size: var(--font-size-3xl); font-weight: 400; letter-spacing: -.03em; line-height: 1.1; }
+/* Einkaufsliste */
+.einkauf { margin-bottom: var(--space-16); }
+.einkauf__zahl { display: inline-grid; place-items: center; min-width: 2rem; height: 2rem; padding: 0 .5rem; margin-left: var(--space-2); vertical-align: middle; border-radius: var(--radius-full); background: var(--color-primary); color: var(--color-text-inverse); font-size: var(--font-size-sm); font-weight: 500; letter-spacing: 0; }
+.einkauf__zahl:empty { display: none; }
+.einkauf__regel { font-size: var(--font-size-sm); color: var(--color-text-muted); max-width: 22rem; }
+.einkauf__liste { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr)); gap: var(--space-3); }
+.kauf {
+    display: flex; align-items: center; gap: var(--space-4);
+    padding: var(--space-3) var(--space-3) var(--space-3) var(--space-3);
+    border-radius: var(--radius-lg);
+    background: var(--color-surface-secondary);
+    border: 1px solid transparent;
+    animation: rise .35s cubic-bezier(.2, .9, .25, 1) backwards;
+    transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+.kauf:hover { border-color: var(--color-border); background: var(--color-surface); }
+.kauf__info { display: flex; align-items: center; gap: var(--space-4); flex: 1; min-width: 0; text-align: left; }
+.kauf__info .spool, .kauf__info .ghost { --s: 3.25rem; width: 3.25rem; height: 3.25rem; flex: none; }
+.kauf__info .ghost { border-width: 1.5px; }
+.kauf__info .ghost span { display: none; }
+.kauf__text { min-width: 0; }
+.kauf__name { display: block; font-weight: 500; line-height: 1.25; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.kauf__meta { display: block; font-size: var(--font-size-xs); color: var(--color-text-muted); margin-top: .1rem; }
+.kauf__stand { display: inline-flex; align-items: center; gap: .35rem; margin-top: .3rem; font-size: var(--font-size-xs); font-weight: 500; color: var(--color-text-secondary); }
+.kauf__stand i { width: .5rem; height: .5rem; border-radius: 50%; background: var(--hp, var(--color-border-strong)); }
+.kauf .btn { height: 2.5rem; padding: 0 var(--space-4); flex: none; }
+.einkauf__leer { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-5) var(--space-6); border-radius: var(--radius-lg); background: var(--color-surface-secondary); color: var(--color-text-secondary); font-size: var(--font-size-sm); }
+.einkauf__leer i { width: .6rem; height: .6rem; border-radius: 50%; background: var(--hp-70); box-shadow: 0 0 0 3px rgba(110, 143, 94, .2); }
+
 .shops { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-6); }
 .shop {
     position: relative; overflow: hidden;
@@ -595,6 +624,12 @@ body.is-locked { overflow: hidden; }
     .rows { margin: 0 calc(-1 * var(--space-2)); padding: 0 var(--space-2); }
     .hp { height: .55rem; bottom: calc((var(--board) - .55rem) / 2 - 1px); gap: 1px; padding: 1px; }
     .shelf__foot { font-size: var(--font-size-xs); }
+    .kauf { gap: var(--space-3); }
+    .kauf__info { gap: var(--space-3); }
+    .kauf__stand { white-space: nowrap; }
+    .kauf .btn { padding: 0 var(--space-3); letter-spacing: .08em; }
+    .kauf .btn svg { display: none; }
+    .einkauf { margin-bottom: var(--space-12); }
     .main { padding-top: var(--space-12); }
     .section__title { font-size: var(--font-size-2xl); }
     .shop { padding: var(--space-6); }
@@ -690,6 +725,17 @@ body.is-locked { overflow: hidden; }
 
 <main class="main">
     <div class="container">
+        <section class="einkauf" aria-labelledby="einkaufTitel">
+            <div class="section__head">
+                <div>
+                    <p class="label section__label">Wird knapp</p>
+                    <h2 class="section__title" id="einkaufTitel">Einkaufsliste <span class="einkauf__zahl" id="einkaufZahl"></span></h2>
+                </div>
+                <p class="einkauf__regel">Farben mit nur noch einer Rolle ab 500 g abwärts, und leere Plätze</p>
+            </div>
+            <div class="einkauf__liste" id="einkauf"></div>
+        </section>
+
         <div class="section__head">
             <div>
                 <p class="label section__label">Nachkaufen</p>
@@ -729,7 +775,12 @@ const ARTEN = {
         "PLA+":       SUNLU + "over-6kg-bundle-sale-pla-and-pla-plus-pla-meta-macaron-filament1kg-roll",
         "PLA+ 2.0":   SUNLU + "moq-6kg-pla-2-0-upgraded-pla-pla-plus-3d-printer-filament-1kg",
         "PLA Matte":  SUNLU + "over-6kg-bulk-sale-pla-matte-filament-neatly-wound-filament",
-        "PLA Meta":   SUNLU + "over-6kg-bundle-sales-1-75mm-sunlu-pla-metamacaron-colors-3d-printer-filament-1kg-roll"
+        "PLA Meta":   SUNLU + "over-6kg-bundle-sales-1-75mm-sunlu-pla-metamacaron-colors-3d-printer-filament-1kg-roll",
+        "PLA":        SUNLU + "over-6kg-of-pla-pla-meta-3d-filaments-1kg-2-2lbs-fit-most-of-fdm-printer",
+        "High Speed PLA+ 2.0":  SUNLU + "moq-6kg-high-speed-pla-2-0hspla-plus-2-0-high-speed-3d-printer-filament-1kg",
+        "High Speed Matte PLA": SUNLU + "moq-6kg-high-speed-matte-pla-3d-printer-filament-1kg",
+        "Silk PLA+":            SUNLU + "over-6kg-of-sunlu-silk-pla-3d-printer-filament-1-75mm-1kg-2-2lbs",
+        "Silk PLA+ Dual Color": SUNLU + "over-3kg-bundle-sales-1-75mm-sunlu-multi-color-silk-3d-printer-filament-1kg-roll-dual-color-tri-color-silk-filament"
     },
     "Bambu Lab": {
         "PLA Basic":        BAMBU + "pla-basic-filament",
@@ -1101,7 +1152,7 @@ function zeichneShops() {
     $("#shops").innerHTML = daten.shops.map((s, i) => `
         <article class="shop">
             <div class="shop__dots" aria-hidden="true">${s.farben.map(c => `<i style="--c:${c}"></i>`).join("")}</div>
-            <p class="label shop__label">${s.marke === "Sunlu" ? "PLA+ · PLA+ 2.0 · PLA Matte · PLA Meta" : "PLA Basic · PLA Matte · PETG Translucent"}</p>
+            <p class="label shop__label">${Object.keys(ARTEN[s.marke] || {}).join(" · ")}</p>
             <h3 class="shop__name">${s.marke}</h3>
             <p class="shop__text">${esc(s.text)}</p>
             <div class="shop__actions">
@@ -1112,7 +1163,31 @@ function zeichneShops() {
         </article>`).join("");
 }
 
-function alles() { zeichneFilter(); zeichneRegal(); }
+// Einkaufsliste: Farben mit nur noch einer Rolle, die bei 500 g oder weniger ist, und Farben ohne Rolle
+function zeichneEinkauf() {
+    const liste = daten.farben.map(f => {
+        const rollen = daten.rollen.filter(r => r.farbe === f.id);
+        if (rollen.length > 1 || (rollen.length === 1 && rollen[0].g > 500)) return null;
+        return { f, r: rollen[0] || null, g: rollen.length ? rollen[0].g : 0 };
+    }).filter(Boolean).sort((a, b) => a.g - b.g || sortWert(a.f) - sortWert(b.f));
+
+    $("#einkaufZahl").textContent = liste.length || "";
+    $("#einkauf").innerHTML = liste.length ? liste.map(({ f, r, g }, i) => `
+        <div class="kauf" style="animation-delay:${i * 30}ms">
+            <button class="kauf__info" ${r ? `data-rolle="${r.id}"` : `data-farbe="${f.id}"`} aria-label="${esc(f.name)} öffnen">
+                ${r ? spoolHtml(f, g) : `<div class="ghost" style="--c:${farbHintergrund(f.hex)}"><span>leer</span></div>`}
+                <span class="kauf__text">
+                    <span class="kauf__name">${esc(f.name)}</span>
+                    <span class="kauf__meta">${esc(f.marke)} · ${esc(f.art)}</span>
+                    <span class="kauf__stand" style="${r ? `--hp:var(--hp-${g / 10})` : ""}"><i></i>${r ? `Letzte Rolle · noch ${g} g` : "Keine Rolle mehr"}</span>
+                </span>
+            </button>
+            ${f.link ? `<a class="btn btn--dark" href="${esc(f.link)}" target="_blank" rel="noopener">Kaufen<svg class="icon"><use href="#i-ext"/></svg></a>` : ""}
+        </div>`).join("")
+        : `<p class="einkauf__leer"><i></i>Alles gut gefüllt. Sobald eine Farbe nur noch eine Rolle mit 500 g oder weniger hat, steht sie hier.</p>`;
+}
+
+function alles() { zeichneFilter(); zeichneRegal(); zeichneEinkauf(); }
 
 /* ==========================================================
    Popups
@@ -1307,6 +1382,10 @@ $("#rows").onclick = e => {
     const b = e.target.closest(".cell__btn"); if (!b) return;
     b.dataset.rolle ? zeigeRolle(b.dataset.rolle) : zeigeLeereFarbe(b.dataset.farbe);
 };
+$("#einkauf").onclick = e => {
+    const b = e.target.closest(".kauf__info"); if (!b) return;
+    b.dataset.rolle ? zeigeRolle(b.dataset.rolle) : zeigeLeereFarbe(b.dataset.farbe);
+};
 $("#filters").onclick = e => {
     const b = e.target.closest(".filter"); if (!b) return;
     if (b.dataset.f) filter = { marke: "", art: "" };
@@ -1324,7 +1403,7 @@ modal.addEventListener("click", e => {
         // Während das Popup offen war, kann ein Sync das Regal ersetzt haben: deshalb über die id suchen
         const r = daten.rollen.find(r => r.id === sheet.dataset.rolle);
         if (!r) return schliesse();
-        r.g = +lv.dataset.level; geaendert(r); speichern(); zeichneRegal(); zeigeRolleNeu(r.id); return;
+        r.g = +lv.dataset.level; geaendert(r); speichern(); zeichneRegal(); zeichneEinkauf(); zeigeRolleNeu(r.id); return;
     }
     const neu = e.target.closest("[data-neue-rolle]");
     if (neu) {
